@@ -19,10 +19,13 @@ package io.divolte.server.js;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.*;
 import com.google.javascript.jscomp.Compiler;
+
 import io.undertow.util.ETag;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -58,9 +61,19 @@ public class JavaScriptResource {
         this.scriptConstants = Objects.requireNonNull(scriptConstants);
         logger.debug("Compiling JavaScript resource: {}", resourceName);
         final Compiler compiler;
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName)) {
-            compiler = compile(resourceName, is, scriptConstants, debugMode);
+
+        if (resourceName.contains("/")) {
+            logger.info("Loading custom javascript file", resourceName);
+
+            try (final InputStream is = new FileInputStream(new File(resourceName))) {
+                compiler = compile(resourceName, is, scriptConstants, debugMode);
+            }
+        } else {
+            try (final InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName)) {
+                compiler = compile(resourceName, is, scriptConstants, debugMode);
+            }
         }
+
         logger.info("Pre-compiled JavaScript source: {}", resourceName);
         final Result result = compiler.getResult();
         if (!result.success || !result.warnings.isEmpty()) {

@@ -77,7 +77,7 @@ public class TrackingJavaScriptResource extends JavaScriptResource {
                                                     final String sourceName) throws IOException {
         final BrowserSourceConfiguration browserSourceConfiguration =
                 vc.configuration().getSourceConfiguration(sourceName, BrowserSourceConfiguration.class);
-        return new TrackingJavaScriptResource("divolte.js",
+        return new TrackingJavaScriptResource(browserSourceConfiguration.javascript.file,
                                               createScriptConstants(browserSourceConfiguration),
                                               browserSourceConfiguration.javascript.debug);
     }
